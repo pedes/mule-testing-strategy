@@ -118,6 +118,11 @@
 			<url>https://repository.mulesoft.org/releases/</url>
 			<layout>default</layout>
 		</repository>
+		<repository>
+	          <id>releases-ee</id>
+	          <name>Mule Release Repository</name>
+	          <url>https://repository.mulesoft.org/nexus/content/repositories/releases-ee/</url>
+	        </repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -130,6 +135,11 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
+		<pluginRepository>
+	          <id>releases-ee</id>
+	          <name>Mule Release Repository</name>
+	          <url>https://repository.mulesoft.org/nexus/content/repositories/releases-ee/</url>
+	        </pluginRepository>
 	</pluginRepositories>
 
 </project>
