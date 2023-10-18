@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d4b1eb7c-5037-42d1-a30a-7b47d2fa668c" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="customer-flow" doc:id="0c3950e6-df9c-46fb-a215-a33be43eaeda" >
+		<http:listener doc:name="GET munit" doc:id="76d08b4b-e03c-4c5f-99d9-78a4f8358af2" config-ref="HTTP_Listener_config" path="/munit"/>
+		<ee:transform doc:name="Transform Message" doc:id="2e074d4c-37c9-402e-b28b-dd21afa2bf23" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	id: 1,
+	email: "fakeuser@hotmail.com",
+	first: "Torrey",
+	last: "Veum",
+	company: "Hilll, Mayert and Wolf",
+	created_at: "2022-12-25T04:06:27.981Z",
+	country: "Switzerland",
+	role: "premium"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3c9e8639-a66d-4bb8-bcc2-ce46e6328d0e" />
+	</flow>
+	<flow name="customer-create" doc:id="a817476d-ec79-47ed-8170-1043e03cba7d" >
+		<http:listener doc:name="POST /customer" doc:id="d0d9d69f-932d-4707-90cd-673e0a2bb909" config-ref="HTTP_Listener_config" path="/customer" allowedMethods="POST">
+			<http:response statusCode="201" >
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Location" : "http://myapp.com/api/v1/customer/1"
+}]]]></http:headers>
+			</http:response>
+		</http:listener>
+		<choice doc:name="Choice" doc:id="2f1d1939-730b-4a8e-b91e-263a889df508" >
+			<when expression="#[payload.email == null]">
+				<raise-error doc:name="Raise error APP:INVALID_CUSTOMER_DATA" doc:id="3573dc51-a405-4ca3-9f18-b4f59b6d47d4" type="APP:INVALID_CUSTOMER_DATA"/>
+			</when>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="73bd739e-0e93-49dc-9868-4a8de51af479" message='#["Inserting the new customer on the DB"]'/>
+		<ee:transform doc:name="Transform Message" doc:id="1773d8ca-1f1d-463c-a399-975dafe21d30" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Customer created"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

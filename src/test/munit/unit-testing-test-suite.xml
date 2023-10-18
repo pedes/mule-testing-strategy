@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="unit-testing-test-suite.xml" />
+	<munit:test name="check-regular-customer-only-swiss-region" doc:id="6587655a-f774-4d8d-bceb-9ce770e2eb76" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to customer-flow" doc:id="e74340f2-6874-49a8-9df3-db41535d6139" name="customer-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that payload is NOT null" doc:id="ced75ed7-a1ac-4103-8bd7-09af1a144628" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert that customer country is Swiss" doc:id="dec37ba1-acf4-4c15-b70d-b27b9a7048df" actual="#[payload.country]" expected='#["Switzerland"]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="create-customer-test" doc:id="8072dbdf-8fd9-407e-a3ae-8e004ad50e72" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Mule Event (Customer Data)" doc:id="e735b9e1-74f8-4afb-9a1c-731ad0708c4b" >
+				<munit:payload value='#[{&#10;	email : "myfakecustomer@mail.com"&#10;}]' />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to customer-create" doc:id="3e9e3d7a-6bec-4e4e-a855-33caf7391cb6" name="customer-create"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="create-customer-failed-exception" doc:id="d3c2379e-bbfc-4472-8158-377837e052df" description="Test a customer cannot be created without a valid email" expectedErrorType="APP:INVALID_CUSTOMER_DATA">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Mule Event (Customer Data NO Email)" doc:id="ba807869-f8e2-4f8b-958b-925bbd66db62" >
+				<munit:payload value="#[{&#10;	// No email included in customers object data&#10;}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to customer-create" doc:id="f66680ca-deda-471b-b2c5-a4cc81fcbdd8" name="customer-create" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logs No validations are required when exceptions are expected" doc:id="fac42c62-c57d-4e92-ae25-f12c882ac53e" message='#["A test that expects exceptions does not use validations"]'/>
+		</munit:validation>
+	</munit:test>
+
+</mule>
